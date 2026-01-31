@@ -1,13 +1,21 @@
 from extractors import homedepot, fedex
 
+EXTRACTORS = {
+    "Home Depot": homedepot,
+    "FedEx": fedex,
+}
+
 import os
 from sheets import load_targets
 from dotenv import load_dotenv
 
 load_dotenv()
+
 def main():    
     sheet_id = os.environ["SHEET_ID"]
     targets = load_targets(sheet_id)
+
+    email_content = []
 
     all_jobs = []
     jobs = []
@@ -15,19 +23,21 @@ def main():
     print("Starting job extraction...")
 
     for target in targets:
-        if target['company'] == 'Home Depot':
-            jobs = homedepot.fetch_jobs(target['url'])
-        elif target['company'] == 'FedEx':
-            jobs = fedex.fetch_jobs(target['url'])    
+        extractor = EXTRACTORS.get(target["company"])
+        if extractor:
+            jobs = extractor.fetch_jobs(target["url"])
             
-        all_jobs.extend(jobs)
-
-    # Do something with jobs, e.g., print or write to Sheet
-    for job in all_jobs:
-        print(job)
+            email_content.append({
+                "company": target["company"],
+                "jobs": jobs
+            })            
+                  
+            all_jobs.extend(jobs)
 
 
     print(f"Total jobs found: {len(all_jobs)}")
+    print(f"Email content prepared for {len(email_content)} companies.")
+    print(f"Email content: {email_content}")
     
     
 if __name__ == "__main__":
