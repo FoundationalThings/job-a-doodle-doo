@@ -5,10 +5,10 @@ EXTRACTORS = {
     "FedEx": fedex,
 }
 
+import email_formatter
 import os
 from sheets import load_targets
 from dotenv import load_dotenv
-
 load_dotenv()
 
 def main():    
@@ -39,6 +39,9 @@ def main():
     print(f"Email content prepared for {len(email_content)} companies.")
     print(f"Email content: {email_content}")
     
+    formatted_email = email_formatter.format_email(email_content)
+    print("Formatted Email Content:")
+    print(formatted_email)
     
 if __name__ == "__main__":
     main()
