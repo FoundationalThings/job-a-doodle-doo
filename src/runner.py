@@ -12,6 +12,12 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from datetime import datetime
+from email_sender import send_email
+
+
+RECIPIENT_EMAIL_ADDRESSES = os.environ.get("RECIPIENT_EMAIL_ADDRESSES")
+
+
 
 def generate_email_subject():
     """Create a subject line with the current date."""
@@ -28,8 +34,8 @@ def generate_email_timestamp():
 
 
 def main():    
-    sheet_id = os.environ["SHEET_ID"]
-    targets = load_targets(sheet_id)
+    SHEET_ID = os.environ["SHEET_ID"]
+    targets = load_targets(SHEET_ID)
 
     email_content = []
 
@@ -39,13 +45,14 @@ def main():
     print("Starting job extraction...")
 
     for target in targets:
+        print(f"Fetching jobs for {target['company']} from {target['url']}...")
         extractor = EXTRACTORS.get(target["company"])
         if extractor:
             jobs = extractor.fetch_jobs(target["url"])
             
             email_content.append({
                 "company": target["company"],
-                "company_url": target.get("company_url", "#"),
+                "company_jobs_url": target['url'],
                 "jobs": jobs
             })            
                   
@@ -53,19 +60,13 @@ def main():
 
 
     print(f"Total jobs found: {len(all_jobs)}")
-    # print(f"Email content prepared for {len(email_content)} companies.")
-    # print(f"Email content: {email_content}")
     
-    # formatted_email = email_formatter.format_email(email_content)
-    # print("Formatted Email Content:")
-    # print(formatted_email)
     
-    timestamp = generate_email_timestamp()
-    subject = generate_email_subject()
-    html_email = email_formatter.format_email_html(email_content, timestamp=timestamp)
 
-    print("Subject:", subject)
-    print(html_email)
-    
+    subject = generate_email_subject()
+    timestamp = generate_email_timestamp()
+    html_body = email_formatter.format_email_html(email_content, timestamp)
+    send_email(subject, html_body, RECIPIENT_EMAIL_ADDRESSES.split(","))
+
 if __name__ == "__main__":
     main()

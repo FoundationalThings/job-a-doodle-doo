@@ -1,6 +1,6 @@
 from .base_extractor import run_extractor
 
-BASE_URL = "https://careers.fedex.com/"
+BASE_URL = "https://careers.fedex.com"
 
 def parse_fedex_jobs(page):
     jobs = []
