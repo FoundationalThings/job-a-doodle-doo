@@ -1,3 +1,18 @@
+from datetime import datetime
+
+def generate_email_subject():
+    """Create a subject line with the current date."""
+    now = datetime.now()
+    date_str = now.strftime("%Y-%m-%d %H:%M")
+    return f"Job Postings as of {date_str}"
+
+def generate_email_timestamp():
+    """Return a readable timestamp for the email footer."""
+    now = datetime.now()
+    return now.strftime("%A, %B %d, %Y at %I:%M %p")
+
+
+
 def format_email_text(jobs_by_company):
     """
     jobs_by_company: list of dicts like
@@ -15,7 +30,7 @@ def format_email_text(jobs_by_company):
 
 
 
-def format_email_html(jobs_by_company, timestamp=None):
+def format_email_html(jobs_by_company):
     """
     Generate an HTML email string from a list of jobs grouped by company.
 
@@ -38,8 +53,8 @@ def format_email_html(jobs_by_company, timestamp=None):
         "<h2>Job Listings</h2>"
     ]
     
-    if timestamp:
-        html_parts.append(f"<p size='small'><em>As of {timestamp}</em></p>")
+    timestamp = generate_email_timestamp()
+    html_parts.append(f"<p size='small'><em>As of {timestamp}</em></p>")
 
     for entry in jobs_by_company:
         print(f"Formatting jobs for {entry}...")
