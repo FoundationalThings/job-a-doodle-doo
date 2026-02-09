@@ -1,9 +1,10 @@
-from extractors import homedepot, fedex, ups
+from extractors import homedepot, fedex, ups, rona
 
 EXTRACTORS = {
     "Home Depot": homedepot,
     "FedEx": fedex,
-    "UPS": ups
+    "UPS": ups,
+    "RONA": rona
 }
 
 import email_formatter
