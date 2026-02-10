@@ -23,10 +23,13 @@ jobs:
                   pip install -r requirements.txt
                   playwright install chromium
 
+            - name: Write Google credentials to file
+              run: echo '${{ secrets.GOOGLE_SHEETS_CREDS }}' > /tmp/google_creds.json
+
             - name: Run job scanner
               env:
                   SHEET_ID: ${{ secrets.SHEET_ID }}
-                  GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_SHEETS_CREDS }}
+                  GOOGLE_APPLICATION_CREDENTIALS: /tmp/google_creds.json
                   SENDER_EMAIL_ADDRESS: ${{ secrets.SENDER_EMAIL_ADDRESS }}
                   SENDER_EMAIL_NAME: ${{ secrets.SENDER_EMAIL_NAME }}
                   SENDER_EMAIL_PASSWORD: ${{ secrets.SENDER_EMAIL_PASSWORD }}
