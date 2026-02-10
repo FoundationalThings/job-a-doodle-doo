@@ -2,7 +2,7 @@ name: Daily Job Scan
 
 on:
     schedule:
-        - cron: "0 9 * * *" # every day at 9am UTC
+        - cron: "0 15 * * 1-5" # 10 AM EST, Monday to Friday
     workflow_dispatch: # allows manual run button in GitHub
 
 jobs:
