@@ -1,11 +1,12 @@
-from extractors import homedepot, fedex, ups, rona, purolator
+from extractors import homedepot, fedex, ups, rona, purolator, canadapost
 
 EXTRACTORS = {
     "Home Depot": homedepot,
     "FedEx": fedex,
     "UPS": ups,
     "RONA": rona,
-    "Purolator": purolator
+    "Purolator": purolator,
+    "Canada Post": canadapost
 }
 
 import email_formatter
@@ -32,7 +33,13 @@ def main():
 
     for target in targets:
         print(f"Fetching jobs for {target['company']} from {target['url']}...")
-        extractor = EXTRACTORS.get(target["company"])
+        
+        extractor = None
+        for key in EXTRACTORS:
+            if target["company"].startswith(key):
+                extractor = EXTRACTORS[key]
+                break
+
         if extractor:
             jobs = extractor.fetch_jobs(target["url"])
             
