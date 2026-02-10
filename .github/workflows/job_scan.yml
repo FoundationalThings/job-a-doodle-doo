@@ -24,10 +24,12 @@ jobs:
                   playwright install chromium
 
             - name: Run job scanner
-              env:
-                  EMAIL_ADDRESS: ${{ secrets.EMAIL_ADDRESS }}
-                  EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
-                  GOOGLE_SHEETS_CREDS: ${{ secrets.GOOGLE_SHEETS_CREDS }}
-                  SHEET_ID: ${{ secrets.SHEET_ID }}
+              env: 
+                  SHEET_ID=${{ secrets.SHEET_ID }}
+                  GOOGLE_APPLICATION_CREDENTIALS=${{ secrets.GOOGLE_SHEETS_CREDS }}
+                  SENDER_EMAIL_ADDRESS=${{ secrets.SENDER_EMAIL_ADDRESS }}
+                  SENDER_EMAIL_NAME=${{ secrets.SENDER_EMAIL_NAME }}
+                  SENDER_EMAIL_PASSWORD=${{ secrets.SENDER_EMAIL_PASSWORD }}
+                  RECIPIENT_EMAIL_ADDRESSES=${{ secrets.RECIPIENT_EMAIL_ADDRESSES }}
               run: |
                   python src/runner.py
