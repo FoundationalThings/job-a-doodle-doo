@@ -1,0 +1,33 @@
+name: Daily Job Scan
+
+on:
+    schedule:
+        - cron: "0 9 * * *" # every day at 9am UTC
+    workflow_dispatch: # allows manual run button in GitHub
+
+jobs:
+    scan:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repo
+              uses: actions/checkout@v4
+
+            - name: Set up Python
+              uses: actions/setup-python@v5
+              with:
+                  python-version: "3.11"
+
+            - name: Install dependencies
+              run: |
+                  pip install -r requirements.txt
+                  playwright install chromium
+
+            - name: Run job scanner
+              env:
+                  EMAIL_ADDRESS: ${{ secrets.EMAIL_ADDRESS }}
+                  EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+                  GOOGLE_SHEETS_CREDS: ${{ secrets.GOOGLE_SHEETS_CREDS }}
+                  SHEET_ID: ${{ secrets.SHEET_ID }}
+              run: |
+                  python src/runner.py
