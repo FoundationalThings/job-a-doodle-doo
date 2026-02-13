@@ -28,18 +28,8 @@ def format_email_html(jobs_by_company, previous_jobs=None):
         ...
     ]
 
-    previous_jobs: optional list of job dicts (same structure as the items in
-        each entry's "jobs" list), representing the jobs from a previous run.
-        Used to determine which current jobs are new (for highlighting) and
-        which previously-seen jobs are no longer posted (for the removal list).
+    previous_jobs: optional flat list of job dicts, each with 'company', representing jobs from a previous run. Used to determine which current jobs are new (for highlighting) and which previously-seen jobs are no longer posted (for the removal list).
     """
-    
-    previous_links = set(job['link'] for job in previous_jobs) if previous_jobs else set()
-    current_links = set(job['link'] for entry in jobs_by_company for job in entry['jobs'])
-    
-    removed_links = previous_links - current_links  # Jobs no longer posted    
-    previous_jobs_by_link = {job['link']: job for job in previous_jobs} if previous_jobs else {}
-
     
     html_parts = [
         "<html>",
@@ -49,13 +39,17 @@ def format_email_html(jobs_by_company, previous_jobs=None):
     
     timestamp = generate_email_timestamp()
     html_parts.append(f"<p size='small'><em>As of {timestamp}</em></p>")
+    
+    previous_links = set(job['link'] for job in previous_jobs) if previous_jobs else set()
+    current_links = set(job['link'] for entry in jobs_by_company for job in entry['jobs'])
+    removed_links = previous_links - current_links
+    previous_jobs_by_link = {job['link']: job for job in previous_jobs} if previous_jobs else {}
 
     for entry in jobs_by_company:
-        print(f"Formatting jobs for {entry}...")
         company = entry["company"]
         company_url = entry.get("company_jobs_url", "#")
         html_parts.append(f'<h3><a href="{company_url}">{company}</a></h3>')
-        
+
         if not entry["jobs"]:
             html_parts.append("<p>No jobs found.</p>")
             continue
@@ -65,12 +59,11 @@ def format_email_html(jobs_by_company, previous_jobs=None):
             job_title = job["title"]
             job_link = job.get("link", "#")
             location = job.get("location", "")
+            # Highlight new jobs
             if previous_jobs is not None and job['link'] not in previous_links:
                 html_parts.append(f'<li>⭐⭐ <a href="{job_link}">{job_title}</a> ({location}) ⭐⭐</li>')
-                print(f"New job found: {job['title']} at {entry['company']} - {job['link']}")
             else:
-                html_parts.append(f'<li><a href="{job_link}">{job_title}</a> ({location})</li>'
-                )
+                html_parts.append(f'<li><a href="{job_link}">{job_title}</a> ({location})</li>')
         html_parts.append("</ul>")
 
 
@@ -92,7 +85,7 @@ def format_email_html(jobs_by_company, previous_jobs=None):
         html_parts.append("</ul>")
     else:
         html_parts.append("<p>No jobs were removed since the last update.</p>")
-
+ 
 
     html_parts.extend([
         "<hr>",
