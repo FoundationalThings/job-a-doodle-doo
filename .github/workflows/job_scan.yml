@@ -1,50 +1,46 @@
 name: Daily Job Scan
 
 on:
-    schedule:
-        - cron: "0 15 * * 1-5" # 10 AM EST, Monday to Friday
-    workflow_dispatch: # allows manual run button in GitHub
+  schedule:
+    - cron: "0 15 * * 1-5" # 10 AM EST, Monday to Friday
+  workflow_dispatch: # allows manual run button in GitHub
 
 jobs:
-    scan:
-        runs-on: ubuntu-latest
+  scan:
+    runs-on: ubuntu-latest
 
-        steps:
-            - name: Checkout repo
-              uses: actions/checkout@v4
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
-            - name: Download previous saved jobs file
-              uses: actions/download-artifact@v4
-              with:
-                  name: saved-jobs
-              continue-on-error: true
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
-            - name: Set up Python
-              uses: actions/setup-python@v5
-              with:
-                  python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          playwright install chromium
 
-            - name: Install dependencies
-              run: |
-                  pip install -r requirements.txt
-                  playwright install chromium
+      - name: Write Google credentials to file
+        run: echo '${{ secrets.GOOGLE_SHEETS_CREDS }}' > /tmp/google_creds.json
 
-            - name: Write Google credentials to file
-              run: echo '${{ secrets.GOOGLE_SHEETS_CREDS }}' > /tmp/google_creds.json
+      - name: Run job scanner
+        env:
+          SHEET_ID: ${{ secrets.SHEET_ID }}
+          GOOGLE_APPLICATION_CREDENTIALS: /tmp/google_creds.json
+          SENDER_EMAIL_ADDRESS: ${{ secrets.SENDER_EMAIL_ADDRESS }}
+          SENDER_EMAIL_NAME: ${{ secrets.SENDER_EMAIL_NAME }}
+          SENDER_EMAIL_PASSWORD: ${{ secrets.SENDER_EMAIL_PASSWORD }}
+          RECIPIENT_EMAIL_ADDRESSES: ${{ secrets.RECIPIENT_EMAIL_ADDRESSES }}
+        run: |
+          python src/runner.py
 
-            - name: Run job scanner
-              env:
-                  SHEET_ID: ${{ secrets.SHEET_ID }}
-                  GOOGLE_APPLICATION_CREDENTIALS: /tmp/google_creds.json
-                  SENDER_EMAIL_ADDRESS: ${{ secrets.SENDER_EMAIL_ADDRESS }}
-                  SENDER_EMAIL_NAME: ${{ secrets.SENDER_EMAIL_NAME }}
-                  SENDER_EMAIL_PASSWORD: ${{ secrets.SENDER_EMAIL_PASSWORD }}
-                  RECIPIENT_EMAIL_ADDRESSES: ${{ secrets.RECIPIENT_EMAIL_ADDRESSES }}
-              run: |
-                  python src/runner.py
-
-            - name: Upload saved jobs file
-              uses: actions/upload-artifact@v4
-              with:
-                  name: saved-jobs
-                  path: saved_jobs.txt
+      - name: Commit updated saved jobs file
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add saved_jobs.txt
+          git diff --quiet && git diff --staged --quiet || git commit -m "Update saved jobs [skip ci]"
+          git push
