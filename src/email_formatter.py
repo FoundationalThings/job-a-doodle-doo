@@ -28,7 +28,10 @@ def format_email_html(jobs_by_company, previous_jobs=None):
         ...
     ]
 
-    previous_jobs: optional flat list of job dicts, each with 'company', representing jobs from a previous run. Used to determine which current jobs are new (for highlighting) and which previously-seen jobs are no longer posted (for the removal list).
+    previous_jobs: optional flat list of job dicts, each with 'company',
+        representing jobs from a previous run. Used to determine which
+        current jobs are new (for highlighting) and which previously-seen
+        jobs are no longer posted (for the removal list).
     """
     
     html_parts = [
