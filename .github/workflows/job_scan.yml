@@ -36,3 +36,9 @@ jobs:
                   RECIPIENT_EMAIL_ADDRESSES: ${{ secrets.RECIPIENT_EMAIL_ADDRESSES }}
               run: |
                   python src/runner.py
+
+            - name: Upload saved jobs file
+              uses: actions/upload-artifact@v4
+              with:
+                  name: saved-jobs
+                  path: saved_jobs.txt
