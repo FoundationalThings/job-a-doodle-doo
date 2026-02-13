@@ -1,4 +1,14 @@
+import os
+
+from dotenv import load_dotenv
+
+import email_formatter
+from email_sender import send_email
 from extractors import homedepot, fedex, ups, rona, purolator, canadapost
+from job_tracker import save_current_jobs_to_file, load_previous_jobs_from_file
+from sheets import load_targets
+
+load_dotenv()
 
 EXTRACTORS = {
     "Home Depot": homedepot,
@@ -10,15 +20,6 @@ EXTRACTORS = {
 }
 
 SAVED_JOBS_FILENAME = "saved_jobs.txt"
-
-import email_formatter
-from email_sender import send_email
-from job_tracker import save_current_jobs_to_file, load_previous_jobs_from_file
-
-import os
-from sheets import load_targets
-from dotenv import load_dotenv
-load_dotenv()
 
 
 
