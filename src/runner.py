@@ -27,7 +27,7 @@ RECIPIENT_EMAIL_ADDRESSES = os.environ.get("RECIPIENT_EMAIL_ADDRESSES")
 def main():    
     SHEET_ID = os.environ["SHEET_ID"]
     targets = load_targets(SHEET_ID)
-    previous_jobs = load_previous_jobs_from_file(SAVED_JOBS_FILENAME) if os.path.exists(SAVED_JOBS_FILENAME) else dict()
+    previous_jobs = load_previous_jobs_from_file(SAVED_JOBS_FILENAME) if os.path.exists(SAVED_JOBS_FILENAME) else []
     
     email_content = []
 
