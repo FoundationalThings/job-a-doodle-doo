@@ -28,18 +28,11 @@ def format_email_html(jobs_by_company, previous_jobs=None):
         ...
     ]
 
-    previous_jobs: optional list of job dicts (same structure as the items in
-        each entry's "jobs" list), representing the jobs from a previous run.
-        Used to determine which current jobs are new (for highlighting) and
-        which previously-seen jobs are no longer posted (for the removal list).
+    previous_jobs: optional flat list of job dicts, each with 'company',
+        representing jobs from a previous run. Used to determine which
+        current jobs are new (for highlighting) and which previously-seen
+        jobs are no longer posted (for the removal list).
     """
-    
-    previous_links = set(job['link'] for job in previous_jobs) if previous_jobs else set()
-    current_links = set(job['link'] for entry in jobs_by_company for job in entry['jobs'])
-    
-    removed_links = previous_links - current_links  # Jobs no longer posted    
-    previous_jobs_by_link = {job['link']: job for job in previous_jobs} if previous_jobs else {}
-
     
     html_parts = [
         "<html>",
@@ -49,13 +42,32 @@ def format_email_html(jobs_by_company, previous_jobs=None):
     
     timestamp = generate_email_timestamp()
     html_parts.append(f"<p size='small'><em>As of {timestamp}</em></p>")
+    
+    # Build sets and maps using .get() to avoid KeyError, filtering out falsy links
+    previous_links = set()
+    previous_jobs_by_link = {}
+    if previous_jobs:
+        for job in previous_jobs:
+            link = job.get('link')
+            if link:
+                previous_links.add(link)
+                previous_jobs_by_link[link] = job
+    
+    current_links = set()
+    for entry in jobs_by_company:
+        for job in entry['jobs']:
+            link = job.get('link')
+            if link:
+                current_links.add(link)
+    
+    removed_links = previous_links - current_links
+
 
     for entry in jobs_by_company:
-        print(f"Formatting jobs for {entry}...")
         company = entry["company"]
         company_url = entry.get("company_jobs_url", "#")
         html_parts.append(f'<h3><a href="{company_url}">{company}</a></h3>')
-        
+
         if not entry["jobs"]:
             html_parts.append("<p>No jobs found.</p>")
             continue
@@ -63,37 +75,41 @@ def format_email_html(jobs_by_company, previous_jobs=None):
         html_parts.append("<ul>")
         for job in entry["jobs"]:
             job_title = job["title"]
-            job_link = job.get("link", "#")
+            job_link = job.get("link") or "#"
             location = job.get("location", "")
-            if previous_jobs is not None and job['link'] not in previous_links:
+            # Highlight new jobs
+            if previous_jobs is not None and job.get('link') not in previous_links:
                 html_parts.append(f'<li>⭐⭐ <a href="{job_link}">{job_title}</a> ({location}) ⭐⭐</li>')
-                print(f"New job found: {job['title']} at {entry['company']} - {job['link']}")
             else:
-                html_parts.append(f'<li><a href="{job_link}">{job_title}</a> ({location})</li>'
-                )
+                html_parts.append(f'<li><a href="{job_link}">{job_title}</a> ({location})</li>')
         html_parts.append("</ul>")
 
 
     html_parts.append("<hr><h3>Jobs that are No Longer Posted</h3>")
     if removed_links:
         html_parts.append("<p><em>Note: the links below may no longer be active.</em></p>")
-        html_parts.append("<ul>")
+         # Collect removed jobs with company info
+        removed_jobs = []
         for link in removed_links:
             prev_job = previous_jobs_by_link.get(link)
             if prev_job:
-                title = prev_job.get('title', 'Unknown Title')
-                location = prev_job.get('location', '')
-                company_name = prev_job.get('company', 'Unknown Company')
-                html_parts.append(
-                    f"<li><strong>{company_name}</strong>: <a href='{link}'>{title}</a> ({location})</li>"
-                )
+                removed_jobs.append(prev_job)
             else:
-                html_parts.append(f"<li><a href='{link}'>{link}</a></li>")
+                removed_jobs.append({'link': link, 'title': link, 'location': '', 'company': 'Unknown Company'})
+        # Sort by company name, then by title
+        removed_jobs.sort(key=lambda job: (job.get('company', 'Unknown Company'), job.get('title', '')))
+        html_parts.append("<ul>")
+        for job in removed_jobs:
+            title = job.get('title', 'Unknown Title')
+            location = job.get('location', '')
+            company_name = job.get('company', 'Unknown Company')
+            link = job.get('link', '#')
+            html_parts.append(
+                f"<li><strong>{company_name}</strong>: <a href='{link}'>{title}</a> ({location})</li>"
+            )
         html_parts.append("</ul>")
     else:
         html_parts.append("<p>No jobs were removed since the last update.</p>")
-
-
     html_parts.extend([
         "<hr>",
         "<p><em>This email was generated by Job-a-Doodle-Doo 🐔</em></p>",

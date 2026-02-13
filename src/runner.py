@@ -33,7 +33,6 @@ def main():
     email_content = []
 
     all_jobs = []
-    jobs = []
     
     print("Starting job extraction...")
 
@@ -55,8 +54,11 @@ def main():
                 "jobs": jobs
             })            
                   
-            all_jobs.extend(jobs)
-
+            # Flatten jobs: add company info to each job
+            for job in jobs:
+                job_with_company = job.copy()
+                job_with_company["company"] = target["company"]
+                all_jobs.append(job_with_company)
 
     print(f"Total jobs found: {len(all_jobs)}")
     
