@@ -34,11 +34,11 @@ def format_email_html(jobs_by_company, previous_jobs=None):
         which previously-seen jobs are no longer posted (for the removal list).
     """
     
-    previous_links = set(job['link'] for job in previous_jobs)
+    previous_links = set(job['link'] for job in previous_jobs) if previous_jobs else set()
     current_links = set(job['link'] for entry in jobs_by_company for job in entry['jobs'])
     
     removed_links = previous_links - current_links  # Jobs no longer posted    
-    previous_jobs_by_link = {job['link']: job for job in previous_jobs}
+    previous_jobs_by_link = {job['link']: job for job in previous_jobs} if previous_jobs else {}
 
     
     html_parts = [
