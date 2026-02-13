@@ -1,10 +1,13 @@
-def save_links_to_file(all_jobs, filename):
+import json
+
+def save_jobs_to_file(all_jobs, filename):
     with open(filename, "w") as f:
-        for job in all_jobs:
-            f.write(job['link'] + "\n")
-            
-            
-def load_links_from_file(filename):
-    with open(filename, "r") as f:
-        return set(line.strip() for line in f.readlines())
-    
+        json.dump(all_jobs, f)
+
+def load_jobs_from_file(filename):
+    try:
+        with open(filename, "r") as f:
+            return json.load(f)
+    except (json.JSONDecodeError, FileNotFoundError):
+        return []
+

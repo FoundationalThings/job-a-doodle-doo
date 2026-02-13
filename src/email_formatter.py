@@ -30,7 +30,7 @@ def format_email_text(jobs_by_company):
 
 
 
-def format_email_html(jobs_by_company, previous_links=None):
+def format_email_html(jobs_by_company, previous_jobs=None):
     """
     Generate an HTML email string from a list of jobs grouped by company.
 
@@ -47,6 +47,13 @@ def format_email_html(jobs_by_company, previous_links=None):
         ...
     ]
     """
+    
+    previous_links = set(job['link'] for job in previous_jobs)
+    current_links = set(job['link'] for entry in jobs_by_company for job in entry['jobs'])
+    
+    removed_links = previous_links - current_links  # Jobs no longer posted
+    new_links = current_links - previous_links      # Newly posted jobs
+    
     html_parts = [
         "<html>",
         "<body>",
@@ -71,7 +78,7 @@ def format_email_html(jobs_by_company, previous_links=None):
             job_title = job["title"]
             job_link = job.get("link", "#")
             location = job.get("location", "")
-            if previous_links is not None and job['link'] not in previous_links:
+            if previous_jobs is not None and job['link'] not in previous_links:
                 html_parts.append(f'<li>⭐⭐ <a href="{job_link}">{job_title}</a> ({location}) ⭐⭐</li>')
                 print(f"New job found: {job['title']} at {entry['company']} - {job['link']}")
             else:
