@@ -2,3 +2,4 @@
 .env
 .secrets-for-github
 __pycache__/
+job_links.txt
