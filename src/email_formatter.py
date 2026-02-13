@@ -74,7 +74,6 @@ def format_email_html(jobs_by_company, previous_jobs=None):
         html_parts.append("</ul>")
 
 
-    if removed_links is not None:
     html_parts.append("<hr><h3>Jobs that are No Longer Posted</h3>")
     if removed_links:
         html_parts.append("<p><em>Note: the links below may no longer be active.</em></p>")
@@ -84,8 +83,9 @@ def format_email_html(jobs_by_company, previous_jobs=None):
             if prev_job:
                 title = prev_job.get('title', 'Unknown Title')
                 location = prev_job.get('location', '')
+                company_name = prev_job.get('company', 'Unknown Company')
                 html_parts.append(
-                    f"<li><strong>{company}</strong>: <a href='{link}'>{title}</a> ({location})</li>"
+                    f"<li><strong>{company_name}</strong>: <a href='{link}'>{title}</a> ({location})</li>"
                 )
             else:
                 html_parts.append(f"<li><a href='{link}'>{link}</a></li>")
