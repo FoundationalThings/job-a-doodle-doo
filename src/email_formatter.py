@@ -27,6 +27,11 @@ def format_email_html(jobs_by_company, previous_jobs=None):
         },
         ...
     ]
+
+    previous_jobs: optional list of job dicts (same structure as the items in
+        each entry's "jobs" list), representing the jobs from a previous run.
+        Used to determine which current jobs are new (for highlighting) and
+        which previously-seen jobs are no longer posted (for the removal list).
     """
     
     previous_links = set(job['link'] for job in previous_jobs)
