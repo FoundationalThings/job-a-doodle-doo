@@ -43,10 +43,25 @@ def format_email_html(jobs_by_company, previous_jobs=None):
     timestamp = generate_email_timestamp()
     html_parts.append(f"<p size='small'><em>As of {timestamp}</em></p>")
     
-    previous_links = set(job.get('link') for job in previous_jobs if job.get('link')) if previous_jobs else set()
-    current_links = set(job.get('link') for entry in jobs_by_company for job in entry['jobs'] if job.get('link'))
+    # Build sets and maps using .get() to avoid KeyError, filtering out falsy links
+    previous_links = set()
+    previous_jobs_by_link = {}
+    if previous_jobs:
+        for job in previous_jobs:
+            link = job.get('link')
+            if link:
+                previous_links.add(link)
+                previous_jobs_by_link[link] = job
+    
+    current_links = set()
+    for entry in jobs_by_company:
+        for job in entry['jobs']:
+            link = job.get('link')
+            if link:
+                current_links.add(link)
+    
     removed_links = previous_links - current_links
-    previous_jobs_by_link = {job.get('link'): job for job in previous_jobs if job.get('link')} if previous_jobs else {}
+
 
     for entry in jobs_by_company:
         company = entry["company"]
