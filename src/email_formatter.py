@@ -43,10 +43,10 @@ def format_email_html(jobs_by_company, previous_jobs=None):
     timestamp = generate_email_timestamp()
     html_parts.append(f"<p size='small'><em>As of {timestamp}</em></p>")
     
-    previous_links = set(job['link'] for job in previous_jobs) if previous_jobs else set()
-    current_links = set(job['link'] for entry in jobs_by_company for job in entry['jobs'])
+    previous_links = set(job.get('link') for job in previous_jobs if job.get('link')) if previous_jobs else set()
+    current_links = set(job.get('link') for entry in jobs_by_company for job in entry['jobs'] if job.get('link'))
     removed_links = previous_links - current_links
-    previous_jobs_by_link = {job['link']: job for job in previous_jobs} if previous_jobs else {}
+    previous_jobs_by_link = {job.get('link'): job for job in previous_jobs if job.get('link')} if previous_jobs else {}
 
     for entry in jobs_by_company:
         company = entry["company"]
@@ -60,10 +60,10 @@ def format_email_html(jobs_by_company, previous_jobs=None):
         html_parts.append("<ul>")
         for job in entry["jobs"]:
             job_title = job["title"]
-            job_link = job.get("link", "#")
+            job_link = job.get("link") or "#"
             location = job.get("location", "")
             # Highlight new jobs
-            if previous_jobs is not None and job['link'] not in previous_links:
+            if previous_jobs is not None and job.get('link') not in previous_links:
                 html_parts.append(f'<li>⭐⭐ <a href="{job_link}">{job_title}</a> ({location}) ⭐⭐</li>')
             else:
                 html_parts.append(f'<li><a href="{job_link}">{job_title}</a> ({location})</li>')
