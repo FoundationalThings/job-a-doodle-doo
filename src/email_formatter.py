@@ -88,18 +88,25 @@ def format_email_html(jobs_by_company, previous_jobs=None):
     html_parts.append("<hr><h3>Jobs that are No Longer Posted</h3>")
     if removed_links:
         html_parts.append("<p><em>Note: the links below may no longer be active.</em></p>")
-        html_parts.append("<ul>")
+         # Collect removed jobs with company info
+        removed_jobs = []
         for link in removed_links:
             prev_job = previous_jobs_by_link.get(link)
             if prev_job:
-                title = prev_job.get('title', 'Unknown Title')
-                location = prev_job.get('location', '')
-                company_name = prev_job.get('company', 'Unknown Company')
-                html_parts.append(
-                    f"<li><strong>{company_name}</strong>: <a href='{link}'>{title}</a> ({location})</li>"
-                )
+                removed_jobs.append(prev_job)
             else:
-                html_parts.append(f"<li><a href='{link}'>{link}</a></li>")
+                removed_jobs.append({'link': link, 'title': link, 'location': '', 'company': 'Unknown Company'})
+        # Sort by company name, then by title
+        removed_jobs.sort(key=lambda job: (job.get('company', 'Unknown Company'), job.get('title', '')))
+        html_parts.append("<ul>")
+        for job in removed_jobs:
+            title = job.get('title', 'Unknown Title')
+            location = job.get('location', '')
+            company_name = job.get('company', 'Unknown Company')
+            link = job.get('link', '#')
+            html_parts.append(
+                f"<li><strong>{company_name}</strong>: <a href='{link}'>{title}</a> ({location})</li>"
+            )
         html_parts.append("</ul>")
     else:
         html_parts.append("<p>No jobs were removed since the last update.</p>")
