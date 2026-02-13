@@ -10,12 +10,14 @@ EXTRACTORS = {
 }
 
 import email_formatter
+from email_sender import send_email
+from job_tracker import save_links_to_file
+
 import os
 from sheets import load_targets
 from dotenv import load_dotenv
 load_dotenv()
 
-from email_sender import send_email
 
 
 RECIPIENT_EMAIL_ADDRESSES = os.environ.get("RECIPIENT_EMAIL_ADDRESSES")
@@ -56,7 +58,8 @@ def main():
     
     subject = email_formatter.generate_email_subject()
     html_body = email_formatter.format_email_html(email_content)
-    send_email(subject, html_body, RECIPIENT_EMAIL_ADDRESSES.split(","))
+    # send_email(subject, html_body, RECIPIENT_EMAIL_ADDRESSES.split(","))
+    save_links_to_file(all_jobs, "job_links.txt")
 
 if __name__ == "__main__":
     main()
